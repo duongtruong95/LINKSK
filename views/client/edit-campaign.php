@@ -121,10 +121,10 @@ if(isset($_POST['save']))
                         <label class="col-sm-12 col-md-2 col-form-label">Trạng thái</label>
                         <div class="col-sm-12 col-md-10">
                             <select class="custom-select col-12" name="status" required>
-                                <option <?=$row['status'] == '1' ? 'selected' : '';?> value="1">ON</option>
-                                <option <?=$row['status'] == '0' ? 'selected' : '';?> value="0">OFF</option>
+                                <option <?=$row['status'] == '0' ? 'selected' : '';?> value="1">ON</option>
+                                <option <?=$row['status'] == '1' ? 'selected' : '';?> value="0">OFF</option>
                             </select>
-                            <small class="form-text text-muted">Nếu trạng thái OFF, người dùng truy cập sẽ chuyển hướng về URL 2(link bán hàng).</small>
+                            <small class="form-text text-muted">Nếu trạng thái ON, người dùng truy cập sẽ chuyển hướng về URL 2(link bán hàng).</small>
                         </div>
                     </div>
                     <div class="form-group row">

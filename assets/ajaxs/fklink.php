@@ -4,7 +4,7 @@
     require_once __DIR__.'/../../class/Mobile_Detect.php';
 
     if(isset($_GET['url']))
-    { 
+    {
         $url = check_string($_GET['url']);
         if(!$row = $CMSNT->get_row("SELECT * FROM `links` WHERE `url_fake` = '$url' AND `status` = 1 "))
         {

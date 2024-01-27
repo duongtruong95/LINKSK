@@ -42,9 +42,22 @@ require_once __DIR__.'/sidebar.php';
             <!-- Simple Datatable start -->
             <div class="card-box mb-30">
                 <div class="pd-20">
+                    <?php
+                    $result = $CMSNT->get_list("SELECT * FROM `links` WHERE `user_id` = '".$getUser['id']."' ORDER BY id DESC ");
+                    $count = count($result);
+                    ?>
                     <h4 class="text-blue h4">DANH SÁCH LINK</h4>
-                    <p class="mb-0">Bạn muốn tạo link mới? <a class="btn btn-primary"
-                            href="<?=BASE_URL('service/fake-link/create');?>">TẠO NGAY</a></p>
+                    <h5 class="text-black h4">Số link còn lại có thể tạo: <?= $getUser['max_link'] > $count ? $getUser['max_link'] - $count : 0; ?> link</h5>
+                    <p class="mb-0">
+                    <?php
+                    if ($getUser['max_link'] > $count) {
+                        ?>
+                        Bạn muốn tạo link mới? <a class="btn btn-primary"
+                                                                  href="<?=BASE_URL('service/fake-link/create');?>">TẠO NGAY</a>
+                    <?php } else { ?>
+                    <p style="color: red; font-style: italic;">NOTE: <b>Bạn vui lòng mua thêm gói để có thể tạo link mới!</b></p>
+                    <?php } ?>
+                    </p>
                 </div>
                 <div class="pb-20 table-responsive">
                     <table class="table hover multiple-select-row data-table-export nowrap ">

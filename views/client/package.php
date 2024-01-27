@@ -39,35 +39,56 @@ require_once __DIR__.'/sidebar.php';
                 <h4 class="mb-30 mt-30 text-blue h4">Bảng Giá Dịch Vụ</h4>
                 <div class="row">
                     <?php foreach($CMSNT->get_list("SELECT * FROM `packages` ") as $row){?>
-                    <div class="col-md-4 mb-30">
+                    <div class="col-md-4 mb-30 card-info">
                         <div class="card-box pricing-card-style2">
                             <div class="pricing-card-header">
-                                <div class="left">
-                                    <h5><?=$row['name'];?></h5>
-                                </div>
                                 <div class="right">
                                     <div class="pricing-price">
-                                        <?=format_currency($row['price']);?><span><?=$row['expired'];?> ngày</span>
+                                        <h5  style="color: #1b00ff !important;
+    font-size: 20px !important;
+    font-weight: bold !important;"><?=$row['name'];?></h5>
                                     </div>
                                 </div>
                             </div>
                             <div class="pricing-card-body">
                                 <div class="pricing-points">
                                     <ul>
-                                        <li>Rút gọn liên kết </li>
-                                        <li>Bọc link VPCS</li>
-                                        <li>Fake link spam</li>
-                                        <li>Hỗ trợ riêng</li>
+                                        <?php
+                                           $content = json_decode($row['content']) ?? [];
+                                            foreach ($content as $item) {
+                                               echo '<li>'.$item.'</li>';
+                                            }
+                                        ?>
                                     </ul>
                                 </div>
                             </div>
+                            <?php if (empty($row['is_trial_package'])) { ?>
+                            <select class="select-month" name="month" id="<?='month_' . $row['id'];?>">
+                                <?php
+                                $moneyMonth = json_decode($row['month_amounts']) ?? [];
+                                foreach ($moneyMonth as $item) {
+                                    echo '<option value="' . $item->month .'-'. $item->amount . '">'.$item->month.' tháng ('.format_currency($item->amount).') </option>';
+                                }
+                                ?>
+                            </select>
+                             <?php } else { ?>
+                                <div style="height: 60px"></div>
+                             <?php } ?>
+                            <?php if (($getUser['flg_trial_package'] != 1 && $row['is_trial_package'] == 1) || $row['is_trial_package'] != 1) { ?>
                             <div class="cta">
                                 <a type="button" href="#" data-id="<?=$row['id'];?>" data-name="<?=$row['name'];?>"
                                     data-expired="<?=$row['expired'];?>"
-                                    data-price="<?=format_currency($row['price']);?>"
-                                    class="btn btn-primary btn-rounded btn-lg buy">MUA
-                                    NGAY</a>
+                                    data-price="<?=$row['price'];?>"
+                                    data-trial="<?=$row['is_trial_package'];?>"
+                                    class="btn btn-primary btn-rounded btn-lg buy">MUA NGAY</a>
                             </div>
+                            <?php } ?>
+                            <?php if ($getUser['flg_trial_package'] == 1 && $row['is_trial_package'] == 1) { ?>
+                                <div class="cta" style="max-width: unset; width: 100%; padding-bottom: 18px; font-weight: bold; color: red;
+    text-align: center;">
+                                    Bạn đã sử dụng gói dùng thử!
+                                </div>
+                            <?php } ?>
                         </div>
                     </div>
                     <?php }?>
@@ -88,6 +109,8 @@ require_once __DIR__.'/sidebar.php';
                             <label class="col-sm-12 col-md-4 col-form-label">Tên gói</label>
                             <div class="col-sm-12 col-md-8">
                                 <input class="form-control" type="hidden" id="id" readonly>
+                                <input class="form-control" type="hidden" id="total_money" readonly>
+                                <input class="form-control" type="hidden" id="month" readonly>
                                 <input class="form-control" type="text" id="name" readonly>
                             </div>
                         </div>
@@ -117,8 +140,21 @@ require_once __DIR__.'/sidebar.php';
         $(".buy").on("click", function() {
             $("#id").val($(this).attr("data-id"));
             $("#name").val($(this).attr("data-name"));
-            $("#expired").val($(this).attr("data-expired") + ' ngày');
-            $("#price").val($(this).attr("data-price"));
+            if ($(this).attr("data-trial") == 1) {
+                $("#price").val('0đ');
+                $("#expired").val('1 ngày');
+                amount = 0
+            } else {
+                var value = $('#month_'+$(this).attr("data-id")).val();
+                var arr = value.split("-");
+                var month = arr[0];
+                var amount = arr[1];
+                $("#price").val(amount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") + ' đ');
+
+                $("#expired").val(month + ' tháng');
+            }
+            $("#total_money").val(amount);
+            $("#month").val(month);
             $("#staticBackdrop").modal();
         });
         </script>
@@ -131,7 +167,9 @@ require_once __DIR__.'/sidebar.php';
                 method: "POST",
                 dataType: "JSON",
                 data: {
-                    id: $("#id").val()
+                    id: $("#id").val(),
+                    total_money: $('#total_money').val(),
+                    month: $('#month').val(),
                 },
                 success: function(respone) {
                     if (respone.status == 'success') {

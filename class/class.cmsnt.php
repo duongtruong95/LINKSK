@@ -40,7 +40,11 @@ class CMSNT
     function cong($table, $data, $sotien, $where)
     {
         $this->connect();
-        $row = $this->ketnoi->query("UPDATE `$table` SET `$data` = `$data` + '$sotien' WHERE $where ");
+        if ($data == 'expired') {
+            $row = $this->ketnoi->query("UPDATE `$table` SET `$data` = '$sotien' WHERE $where ");
+        } else {
+            $row = $this->ketnoi->query("UPDATE `$table` SET `$data` = `$data` + '$sotien' WHERE $where ");
+        }
         return $row;
     }
     function tru($table, $data, $sotien, $where)
@@ -60,7 +64,7 @@ class CMSNT
             $value_list .= ",'".mysqli_real_escape_string($this->ketnoi, $value)."'";
         }
         $sql = 'INSERT INTO '.$table. '('.trim($field_list, ',').') VALUES ('.trim($value_list, ',').')';
- 
+
         return mysqli_query($this->ketnoi, $sql);
     }
     function update($table, $data, $where)

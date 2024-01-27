@@ -20,10 +20,24 @@ if(isset($_POST['create']))
     {
         die('<script type="text/javascript">if(!alert("Không được dùng chức năng này vì đây là trang web demo.")){window.history.back().location.reload();}</script>');
     }
+    $months = $_POST['months'] ?? [];
+    $amounts = $_POST['amounts'] ?? [];
+
+    $month_amounts = [];
+    foreach ($months as $key => $item) {
+        $month_amounts[] = [
+            'month' => $item,
+            'amount' => $amounts[$key] ?? 0,
+        ];
+    }
     $isCreate = $CMSNT->insert("packages", [
         'name' => check_string($_POST['name']),
-        'expired' => check_string($_POST['expired']),
-        'price' => check_string($_POST['price'])
+        'number_link' => $_POST['number_link'],
+        'content' => json_encode($_POST['content']),
+        'months' => json_encode($_POST['months']),
+        'amounts' => json_encode($_POST['amounts']),
+        'month_amounts' => json_encode($month_amounts),
+        'is_trial_package' => $_POST['is_trial_package']
     ]);
     if($isCreate)
     {
@@ -40,10 +54,24 @@ if(isset($_POST['save']))
     {
         die('<script type="text/javascript">if(!alert("Không được dùng chức năng này vì đây là trang web demo.")){window.history.back().location.reload();}</script>');
     }
+    $months = $_POST['months'] ?? [];
+    $amounts = $_POST['amounts'] ?? [];
+
+    $month_amounts = [];
+    foreach ($months as $key => $item) {
+        $month_amounts[] = [
+            'month' => $item,
+            'amount' => $amounts[$key] ?? 0,
+        ];
+    }
     $isCreate = $CMSNT->update("packages", [
         'name' => check_string($_POST['name']),
-        'expired' => check_string($_POST['expired']),
-        'price' => check_string($_POST['price'])
+        'number_link' => $_POST['number_link'],
+        'content' => json_encode($_POST['content'] ?? []),
+        'months' => json_encode($_POST['months'] ?? []),
+        'amounts' => json_encode($_POST['amounts'] ?? []),
+        'month_amounts' => json_encode($month_amounts),
+        'is_trial_package' => $_POST['is_trial_package'] ?? 0
     ], " `id` = '".check_string($_POST['id'])."' ");
     if($isCreate)
     {
@@ -101,15 +129,51 @@ if(isset($_POST['save']))
                                     <input type="text" class="form-control" placeholder="Nhập tên gói cần tạo"
                                         name="name" required>
                                 </div>
+<!--                                <div class="form-group">-->
+<!--                                    <label for="exampleInputEmail1">Thời hạn</label>-->
+<!--                                    <input type="number" class="form-control"-->
+<!--                                        placeholder="Nhập thời gian hết hạn của gói" name="expired" required>-->
+<!--                                </div>-->
+<!--                                <div class="form-group">-->
+<!--                                    <label for="exampleInputEmail1">Số tiền</label>-->
+<!--                                    <input type="number" class="form-control" placeholder="Nhập giá tiền của gói"-->
+<!--                                        name="price" required>-->
+<!--                                </div>-->
                                 <div class="form-group">
-                                    <label for="exampleInputEmail1">Thời hạn</label>
-                                    <input type="number" class="form-control"
-                                        placeholder="Nhập thời gian hết hạn của gói" name="expired" required>
+                                    <label for="exampleInputEmail1">Số lượng link</label>
+                                    <input type="number" class="form-control" placeholder="Nhập số link có thể dùng"
+                                           name="number_link" required>
                                 </div>
                                 <div class="form-group">
-                                    <label for="exampleInputEmail1">Số tiền</label>
-                                    <input type="number" class="form-control" placeholder="Nhập giá tiền của gói"
-                                        name="price" required>
+                                    <label for="exampleInputEmail1">Nhập các nội dung hiển thị ở gói</label>
+                                    <div id="dynamic-inputs">
+                                        <div class="input-group mr-bottom">
+                                            <input type="text" class="form-control" placeholder="Nhập mục" name="content[]" required>
+                                            <div class="input-group-append">
+                                                <button type="button" class="btn btn-danger remove-input">Xóa</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <button type="button" class="btn btn-primary" id="add-input">Thêm mục nội dung</button>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="exampleInputEmail1">Nhập số tháng và tiền theo gói</label>
+                                    <div id="dynamic-inputs-2">
+                                        <div class="input-group mr-bottom">
+                                            <input type="number" class="form-control" placeholder="Số tháng" name="months[]" required>
+                                            <input type="number" class="form-control" placeholder="Số tiền" name="amounts[]" required>
+                                            <div class="input-group-append">
+                                                <button type="button" class="btn btn-danger remove-input-2">Xóa</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <button type="button" class="btn btn-primary" id="add-input-2">Thêm mục tháng và tiền</button>
+                                </div>
+                                <div class="form-group">
+                                    <label for="exampleInputEmail1">Gói dùng thử</label>
+                                    <input type="checkbox" class="form-control" value="1"
+                                           name="is_trial_package" >
                                 </div>
                             </div>
                             <div class="card-footer clearfix">
@@ -144,26 +208,52 @@ if(isset($_POST['save']))
                                     <thead>
                                         <tr>
                                             <th>#</th>
-                                            <th>NAME</th>
-                                            <th>EXPIRED</th>
-                                            <th>PRICE</th>
-                                            <th>ACTION</th>
+                                            <th>Tên gói</th>
+                                            <th>Thông tin gói</th>
+                                            <th>Các giá gói</th>
+                                            <th>Số lượng link</th>
+                                            <th>Gói dùng thử</th>
+                                            <th>Hành Động</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         <?php
                                     $i = 0;
                                     foreach($CMSNT->get_list(" SELECT * FROM `packages` ORDER BY id DESC  ") as $row){
+                                        $content = json_decode($row['content']) ?? [];
+                                        $htmlContent = '';
+                                        foreach ($content as $item) {
+                                            $htmlContent .= '<p>★ '.$item.'</p>';
+                                        }
+                                        $moneyMonth = json_decode($row['month_amounts']) ?? [];
+                                        $months = json_decode($row['months']) ?? [];
+                                        $amounts = json_decode($row['amounts']) ?? [];
+                                        $htmlMoneyMonth = '';
+                                        foreach ($moneyMonth as $item) {
+                                            $htmlMoneyMonth .= '<p>'.$item->month.' tháng - ' . format_currency($item->amount) .'</p>';
+                                        }
                                     ?>
                                         <tr>
                                             <td><?=$i++;?></td>
                                             <td><?=$row['name'];?></td>
-                                            <td><?=$row['expired'];?> ngày</td>
-                                            <td><?=format_cash($row['price']);?>đ</td>
+                                            <td><?=$htmlContent;?></td>
+                                            <td><?=$htmlMoneyMonth?></td>
+                                            <td><?=$row['number_link'];?></td>
+                                            <td><?=$row['is_trial_package'] ? 'Bản Trải Nghiệm' : '';?></td>
                                             <td>
+                                                <?php
+                                                    foreach ($content as $item) {
+                                                        echo '<input type="hidden" class="'.$row['id'].'-content" name="content[]" value="'.$item.'" >';
+                                                    }
+                                                    foreach ($moneyMonth as $item) {
+                                                        echo '<input type="hidden" class="'.$row['id'].'-month_amounts" name="month_amounts[]" data-amount="'.$item->amount.'" data-month="'.$item->month.'" >';
+                                                    }
+                                                ?>
                                                 <button aria-label="" style="color:white;" data-id="<?=$row['id'];?>"
                                                     data-name="<?=$row['name'];?>" data-expired="<?=$row['expired'];?>"
                                                     data-price="<?=$row['price'];?>"
+                                                    data-trial="<?=$row['is_trial_package'];?>"
+                                                    data-link="<?=$row['number_link'];?>"
                                                     class="btn btn-info btn-icon-left m-b-10 edit" type="button">
                                                     <i class="fas fa-edit mr-1"></i><span class="">Edit</span>
                                                 </button>
@@ -180,6 +270,37 @@ if(isset($_POST['save']))
                         </div>
                     </div>
                     <script type="text/javascript">
+                        $('#add-input').click(function () {
+                            var inputGroup = $('<div class="input-group mr-bottom"></div>');
+                            var input = $('<input type="text" class="form-control" placeholder="Nhập mục" name="content[]" required>');
+                            var button = $('<button type="button" class="btn btn-danger remove-input">Xóa</button>');
+                            button.click(function () {
+                                $(this).closest('.input-group').remove();
+                            });
+                            inputGroup.append(input);
+                            inputGroup.append($('<div class="input-group-append"></div>').append(button));
+                            $('#dynamic-inputs').append(inputGroup);
+                        });
+                        $(document).on('click', '.remove-input', function () {
+                            $(this).closest('.input-group').remove();
+                        });
+
+                        $('#add-input-2').click(function () {
+                            var inputGroup = $('<div class="input-group mr-bottom"></div>');
+                            var inputMonths = $('<input type="number" class="form-control" placeholder="Số tháng" name="months[]" required>');
+                            var inputAmounts = $('<input type="number" class="form-control" placeholder="Số tiền" name="amounts[]" required>');
+                            var button = $('<button type="button" class="btn btn-danger remove-input-2">Xóa</button>');
+                            button.click(function () {
+                                $(this).closest('.input-group').remove();
+                            });
+                            inputGroup.append(inputMonths);
+                            inputGroup.append(inputAmounts);
+                            inputGroup.append($('<div class="input-group-append"></div>').append(button));
+                            $('#dynamic-inputs-2').append(inputGroup);
+                        });
+                        $(document).on('click', '.remove-input-2', function () {
+                            $(this).closest('.input-group').remove();
+                        });
                     $(".delete").on("click", function() {
                         cuteAlert({
                             type: "question",
@@ -248,15 +369,38 @@ if(isset($_POST['save']))
                         <input type="hidden" class="form-control" placeholder="Nhập tên gói cần tạo" name="id" id="id"
                             required>
                     </div>
+<!--                    <div class="form-group">-->
+<!--                        <label for="exampleInputEmail1">Thời hạn</label>-->
+<!--                        <input type="number" class="form-control" placeholder="Nhập thời gian hết hạn của gói"-->
+<!--                            id="expired" name="expired" required>-->
+<!--                    </div>-->
+<!--                    <div class="form-group">-->
+<!--                        <label for="exampleInputEmail1">Số tiền</label>-->
+<!--                        <input type="number" class="form-control" placeholder="Nhập giá tiền của gói" id="price"-->
+<!--                               name="price" required>-->
+<!--                    </div>-->
                     <div class="form-group">
-                        <label for="exampleInputEmail1">Thời hạn</label>
-                        <input type="number" class="form-control" placeholder="Nhập thời gian hết hạn của gói"
-                            id="expired" name="expired" required>
+                        <label for="exampleInputEmail1">Số lượng link</label>
+                        <input type="number" class="form-control" placeholder="Nhập số link có thể dùng" id="number_link"
+                            name="number_link" required>
                     </div>
                     <div class="form-group">
-                        <label for="exampleInputEmail1">Số tiền</label>
-                        <input type="number" class="form-control" placeholder="Nhập giá tiền của gói" id="price"
-                            name="price" required>
+                        <label for="exampleInputEmail1">Nhập các nội dung hiển thị ở gói</label>
+                        <div id="dynamic-inputs-edit">
+                        </div>
+                        <button type="button" class="btn btn-primary" id="add-input-edit">Thêm mục nội dung</button>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="exampleInputEmail1">Nhập số tháng và tiền theo gói</label>
+                        <div id="dynamic-inputs-2-edit">
+                        </div>
+                        <button type="button" class="btn btn-primary" id="add-input-2-edit">Thêm mục tháng và tiền</button>
+                    </div>
+                    <div class="form-group">
+                        <label for="exampleInputEmail1">Gói dùng thử</label>
+                        <input type="checkbox" class="form-control" id="is_trial_package" value="1"
+                            name="is_trial_package">
                     </div>
                 </div>
                 <div class="card-footer clearfix">
@@ -270,11 +414,81 @@ if(isset($_POST['save']))
 </div>
 <!-- Modal -->
 <script type="text/javascript">
+    $('#add-input-edit').click(function () {
+        var inputGroup = $('<div class="input-group mr-bottom"></div>');
+        var input = $('<input type="text" class="form-control" placeholder="Nhập mục" name="content[]" required>');
+        var button = $('<button type="button" class="btn btn-danger remove-input-edit">Xóa</button>');
+        button.click(function () {
+            $(this).closest('.input-group').remove();
+        });
+        inputGroup.append(input);
+        inputGroup.append($('<div class="input-group-append"></div>').append(button));
+        $('#dynamic-inputs-edit').append(inputGroup);
+    });
+    $(document).on('click', '.remove-input-edit', function () {
+        $(this).closest('.input-group').remove();
+    });
+
+    $('#add-input-2-edit').click(function () {
+        var inputGroup = $('<div class="input-group mr-bottom"></div>');
+        var inputMonths = $('<input type="number" class="form-control" placeholder="Số tháng" name="months[]" required>');
+        var inputAmounts = $('<input type="number" class="form-control" placeholder="Số tiền" name="amounts[]" required>');
+        var button = $('<button type="button" class="btn btn-danger remove-input-2-edit">Xóa</button>');
+        button.click(function () {
+            $(this).closest('.input-group').remove();
+        });
+        inputGroup.append(inputMonths);
+        inputGroup.append(inputAmounts);
+        inputGroup.append($('<div class="input-group-append"></div>').append(button));
+        $('#dynamic-inputs-2-edit').append(inputGroup);
+    });
+    $(document).on('click', '.remove-input-2-edit', function () {
+        $(this).closest('.input-group').remove();
+    });
 $(".edit").on("click", function() {
     $("#id").val($(this).attr("data-id"));
     $("#name").val($(this).attr("data-name"));
     $("#expired").val($(this).attr("data-expired"));
     $("#price").val($(this).attr("data-price"));
+    $("#price").val($(this).attr("data-price"));
+    $("#number_link").val($(this).attr("data-link"));
+    if ($(this).attr("data-trial") == 1) {
+        $("#is_trial_package").prop('checked', true);
+    }
+    var idRow = $(this).attr("data-id");
+    $('.' + idRow + '-content').each(function () {
+        var value = $(this).val();
+        var inputGroup = $('<div class="input-group mr-bottom"></div>');
+        var input = $('<input type="text" class="form-control" placeholder="Nhập mục" name="content[]" value="'+value+'" required>');
+        var button = $('<button type="button" class="btn btn-danger remove-input-edit">Xóa</button>');
+        button.click(function () {
+            $(this).closest('.input-group').remove();
+        });
+        inputGroup.append(input);
+        inputGroup.append($('<div class="input-group-append"></div>').append(button));
+        $('#dynamic-inputs-edit').append(inputGroup);
+    });
+    $('.' + idRow + '-month_amounts').each(function () {
+        var month = $(this).data('month');
+        var amount = $(this).data('amount');
+        var inputGroup = $('<div class="input-group mr-bottom"></div>');
+        var inputMonths = $('<input type="number" class="form-control" placeholder="Số tháng" name="months[]" value="'+month+'" required>');
+        var inputAmounts = $('<input type="number" class="form-control" placeholder="Số tiền" name="amounts[]" value="'+amount+'" required>');
+        var button = $('<button type="button" class="btn btn-danger remove-input-2-edit">Xóa</button>');
+        button.click(function () {
+            $(this).closest('.input-group').remove();
+        });
+        inputGroup.append(inputMonths);
+        inputGroup.append(inputAmounts);
+        inputGroup.append($('<div class="input-group-append"></div>').append(button));
+        $('#dynamic-inputs-2-edit').append(inputGroup);
+    });
+
+    $('#staticBackdrop').on('hidden.bs.modal', function () {
+        $('#dynamic-inputs-edit').html('');
+        $('#dynamic-inputs-2-edit').html('');
+    });
+
     $("#staticBackdrop").modal();
 });
 </script>

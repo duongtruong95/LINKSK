@@ -3978,6 +3978,19 @@ body.IE .register-page-wrap .container{
 	color: #ebecef;
 	font-weight: 500;
 }
+.select-month {
+	width: 100%;
+	height: 60px;
+	line-height: 60px;
+	border-radius: 5px;
+	padding: 18px;
+}
+.card-info .card-box {
+	height: 100%;
+}
+.mr-bottom {
+	margin-bottom: 20px;
+}
 /*==============================================================
 	Documentation End
 ==============================================================*/
