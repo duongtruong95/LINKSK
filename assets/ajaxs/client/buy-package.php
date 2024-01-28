@@ -58,7 +58,12 @@
                 'thoigian'      => gettime(),
                 'noidung'       => "Thanh toán gói ".$row['name'],
             ]);
-
+            $CMSNT->update("links", [
+                'flg_old'  => 1,
+            ], " `user_id` = '".$getUser['id']."' ");
+            $CMSNT->update("campaigns", [
+                'flg_old'  => 1,
+            ], " `user_id` = '".$getUser['id']."' ");
             $data = json_encode([
                 'status'    => 'success',
                 'msg'       => 'Tài khoản của bạn đã được gia hạn thêm '.$expiredDay.' ngày.'

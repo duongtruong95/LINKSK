@@ -43,7 +43,7 @@ require_once __DIR__.'/sidebar.php';
             <div class="card-box mb-30">
                 <div class="pd-20">
                     <?php
-                    $result = $CMSNT->get_list("SELECT * FROM `links` WHERE `user_id` = '".$getUser['id']."' ORDER BY id DESC ");
+                    $result = $CMSNT->get_list("SELECT * FROM `links` WHERE `user_id` = '".$getUser['id']."' AND flg_old = 0 ORDER BY id DESC ");
                     $count = count($result);
                     ?>
                     <h4 class="text-blue h4">DANH SÁCH LINK</h4>

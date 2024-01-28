@@ -52,11 +52,11 @@ function format_currency($amount)
 }
 function status_camp($data)
 {
-    if ($data == 1)
+    if ($data == 0)
     {
         $show = '<span class="badge badge-success">ON</span>';
     }
-    else if ($data == 0)
+    else if ($data == 1)
     {
         $show = '<span class="badge badge-danger">OFF</span>';
     }
