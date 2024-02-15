@@ -44,13 +44,15 @@ require_once __DIR__.'/sidebar.php';
                 <div class="pd-20">
                     <?php
                     $result = $CMSNT->get_list("SELECT * FROM `links` WHERE `user_id` = '".$getUser['id']."' AND flg_old = 0 ORDER BY id DESC ");
+                    $resultExpired = $CMSNT->get_list("SELECT * FROM `users` WHERE `id` = '".$getUser['id']."' AND expired < 1");
                     $count = count($result);
+                    $countExpired = count($resultExpired);
                     ?>
                     <h4 class="text-blue h4">DANH SÁCH LINK</h4>
                     <h5 class="text-black h4">Số link còn lại có thể tạo: <?= $getUser['max_link'] > $count ? $getUser['max_link'] - $count : 0; ?> link</h5>
                     <p class="mb-0">
                     <?php
-                    if ($getUser['max_link'] > $count) {
+                    if ($getUser['max_link'] > $count && $countExpired == 0) {
                         ?>
                         Bạn muốn tạo link mới? <a class="btn btn-primary"
                                                                   href="<?=BASE_URL('service/fake-link/create');?>">TẠO NGAY</a>
@@ -64,7 +66,11 @@ require_once __DIR__.'/sidebar.php';
                         <thead>
                             <tr>
                                 <th class="table-plus datatable-nosort">#</th>
+                                <?php
+                                    if ($getUser['max_link'] > $count && $countExpired == 0) {
+                                ?>
                                 <th class="datatable-nosort">Action</th>
+                                <?php } ?>
                                 <th>Title</th>
                                 <th>Description</th>
                                 <th>Image</th>
@@ -79,6 +85,9 @@ require_once __DIR__.'/sidebar.php';
                             <?php $i=0; foreach($CMSNT->get_list("SELECT * FROM `links` WHERE `user_id` = '".$getUser['id']."' ORDER BY `id` DESC ") as $row){?>
                             <tr>
                                 <td class="table-plus"><?=$i++;?></td>
+                                 <?php
+                                    if ($getUser['max_link'] > $count && $countExpired == 0) {
+                                ?>
                                 <td>
                                     <div class="dropdown">
                                         <a class="btn btn-link font-24 p-0 line-height-1 no-arrow dropdown-toggle"
@@ -102,6 +111,7 @@ require_once __DIR__.'/sidebar.php';
                                         </div>
                                     </div>
                                 </td>
+                                    <?php } ?>
                                 <td><?=$row['title'];?></td>
                                 <td><?=$row['description'];?></td>
                                 <td><img src="<?=BASE_URL($row['url_img']);?>" width="100px" /></td>
