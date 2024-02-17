@@ -24,6 +24,12 @@ if(isset($_GET['id']))
     {
         die('404 - Trang không tồn tại !');
     }
+
+    $rowLinks = $CMSNT->get_list("SELECT * FROM `links` WHERE `id` = '$id' AND `flg_old` = 1  ");
+    if(count($rowLinks))
+    {
+        die('404 - Trang không tồn tại !');
+    }
 }
 else
 {

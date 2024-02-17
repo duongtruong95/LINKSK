@@ -24,6 +24,14 @@
             ]);
             die($data);
         }
+
+        $CMSNT->update("campaigns", [
+            'status'  => 1,
+        ], " `user_id` = '".$getUser['id']."' ");
+        $CMSNT->update("links", [
+            'status'  => 0,
+        ], " `user_id` = '".$getUser['id']."' ");
+
         if ($row['is_trial_package'] == 1) {
             $expiredDay = 1;
             $month = 0;

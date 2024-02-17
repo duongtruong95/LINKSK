@@ -24,6 +24,11 @@ if(isset($_GET['id']))
     {
         die('404 - Trang không tồn tại !');
     }
+    $rowCampaigns = $CMSNT->get_list("SELECT * FROM `campaigns` WHERE `id` = '$id' AND `flg_old` = 1  ");
+    if(count($rowCampaigns))
+    {
+        die('404 - Trang không tồn tại !');
+    }
 }
 else
 {

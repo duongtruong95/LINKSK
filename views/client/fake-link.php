@@ -67,7 +67,7 @@ require_once __DIR__.'/sidebar.php';
                             <tr>
                                 <th class="table-plus datatable-nosort">#</th>
                                 <?php
-                                    if ($getUser['max_link'] > $count && $countExpired == 0) {
+                                    if ($countExpired == 0) {
                                 ?>
                                 <th class="datatable-nosort">Action</th>
                                 <?php } ?>
@@ -86,9 +86,12 @@ require_once __DIR__.'/sidebar.php';
                             <tr>
                                 <td class="table-plus"><?=$i++;?></td>
                                  <?php
-                                    if ($getUser['max_link'] > $count && $countExpired == 0) {
+                                    if ($countExpired == 0) {
                                 ?>
                                 <td>
+                                       <?php
+                                    if ($row['flg_old'] == 0) {
+                                ?>
                                     <div class="dropdown">
                                         <a class="btn btn-link font-24 p-0 line-height-1 no-arrow dropdown-toggle"
                                             href="#" role="button" data-toggle="dropdown">
@@ -110,6 +113,9 @@ require_once __DIR__.'/sidebar.php';
                                                     class="dw dw-delete-3"></i> Delete</a>
                                         </div>
                                     </div>
+                                    <?php } else { ?>
+                                        <span style="font-weight: bold; color: red">Link hết hạn</span>
+                                    <?php } ?>
                                 </td>
                                     <?php } ?>
                                 <td><?=$row['title'];?></td>

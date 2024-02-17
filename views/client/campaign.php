@@ -75,7 +75,7 @@ require_once __DIR__.'/sidebar.php';
                                 <th>View</th>
                                 <th>Status</th>
                                     <?php
-                                    if ($getUser['max_link'] > $count && $countExpired == 0) {
+                                    if ($countExpired == 0) {
                                 ?>
                                 <th>Action</th>
                                     <?php } ?>
@@ -95,9 +95,12 @@ require_once __DIR__.'/sidebar.php';
                                         aria-hidden="true"></i><?=format_cash($row['views']);?></td>
                                 <td><?=status_camp($row['status']);?></td>
                                     <?php
-                                    if ($getUser['max_link'] > $count && $countExpired == 0) {
+                                    if ($countExpired == 0) {
                                 ?>
                                 <td>
+                                     <?php
+                                    if ($row['flg_old'] == 0) {
+                                ?>
                                     <div class="dropdown">
                                         <a class="btn btn-link font-24 p-0 line-height-1 no-arrow dropdown-toggle"
                                             href="#" role="button" data-toggle="dropdown">
@@ -114,6 +117,9 @@ require_once __DIR__.'/sidebar.php';
                                                     class="dw dw-delete-3"></i> Delete</a>
                                         </div>
                                     </div>
+                                    <?php } else { ?>
+                                        <span style="font-weight: bold; color: red">Link hết hạn</span>
+                                    <?php } ?>
                                 </td>
                                     <?php } ?>
                             </tr>
