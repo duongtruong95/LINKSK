@@ -14,7 +14,7 @@
     
  
     // Truy cập link vpcs khi trạng thái camp đang tắt.
-    if($row['status'] == 0 && GetCountry(myip()) == 'vn')
+    if($row['status'] == 0 && (GetCountry(myip()) == 'vn' || GetCountry(myip()) == 'VN'))
     {
         // Nếu chặn desktop được bật, người dùng truy cập bằng máy tính sẽ luôn ở lại link sạch
         if($row['block_desktop'] == 1 && !$Mobile_Detect->isMobile())
